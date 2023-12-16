@@ -98,12 +98,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   ? '${note.details.substring(0, 100)}...'
                   : note.details),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => NoteDetailPage(note: note),
-                  ),
-                );
+                _navigateToNoteEditPage(note);
               },
             ),
           ),
@@ -124,6 +119,27 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         notes.add(result);
       });
       NoteStorage.addNote(result); // Yeni notu yerel depolamada sakla
+    }
+  }
+
+  void _navigateToNoteEditPage(Note note) async {
+    final updatedNote = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => NoteDetailPage(note: note)),
+    );
+
+    if (updatedNote != null && updatedNote is Note) {
+      setState(() {
+        final index =
+            notes.indexWhere((element) => element.title == updatedNote.title);
+        if (index != -1) {
+          notes[index] = updatedNote; // Update the existing note with changes
+        } else {
+          notes.add(updatedNote); // Add the new note to the list
+        }
+      });
+      NoteStorage.addOrUpdateNote(
+          updatedNote); // Save or update the note in storage
     }
   }
 

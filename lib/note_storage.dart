@@ -59,6 +59,23 @@ class NoteStorage {
     }
   }
 
+  static Future<void> addOrUpdateNote(Note note) async {
+    try {
+      String directoryPath = await _getNotesDirectoryPath();
+      Directory directory = Directory('$directoryPath/${note.title}');
+      if (!(await directory.exists())) {
+        await directory.create(recursive: true);
+      }
+
+      File noteFile = File('$directoryPath/${note.title}/${note.title}.txt');
+      await noteFile.writeAsString(note.details);
+      print('NOTE ADDED/UPDATED SUCCESSFULLY');
+      print(noteFile.path.toUpperCase());
+    } catch (e) {
+      print('Error while adding/updating note: $e');
+    }
+  }
+
   static Future<void> deleteNote(Note note) async {
     try {
       String directoryPath = await _getNotesDirectoryPath();
