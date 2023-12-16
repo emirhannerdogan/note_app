@@ -72,7 +72,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         ),
       ),
       onDismissed: (direction) {
-        // Notu listeden kaldırma işlemini burada gerçekleştirin
+        NoteStorage.deleteNote(note);
         setState(() {
           notes.remove(note);
         });
