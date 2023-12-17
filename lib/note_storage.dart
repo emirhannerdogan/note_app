@@ -87,4 +87,15 @@ class NoteStorage {
       print('Error while deleting note: $e');
     }
   }
+
+  static Future<bool> doesNoteExist(String title) async {
+    try {
+      String directoryPath = await _getNotesDirectoryPath();
+      Directory directory = Directory('$directoryPath/$title');
+      return await directory.exists();
+    } catch (e) {
+      print('Error while checking note existence: $e');
+      return false;
+    }
+  }
 }

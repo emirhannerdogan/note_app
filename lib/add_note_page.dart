@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:note_app/note.dart';
+import 'package:note_app/note_storage.dart';
 
 class AddNotePage extends StatelessWidget {
   final TextEditingController titleController = TextEditingController();
@@ -40,16 +41,55 @@ class AddNotePage extends StatelessWidget {
     );
   }
 
-  void _saveNote(BuildContext context) {
+  void _saveNote(BuildContext context) async {
     String title = titleController.text;
     String details = detailsController.text;
 
     if (title.isNotEmpty && details.isNotEmpty) {
-      Note newNote = Note(title: title, details: details);
-      Navigator.pop(context, newNote);
+      bool noteExists = await NoteStorage.doesNoteExist(title);
+      if (noteExists) {
+        // Show dialog to notify the user that the note already exists
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Note Already Exists'),
+              content: Text('A note with this title already exists.'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        // Create a new note and navigate back with it
+        Note newNote = Note(title: title, details: details);
+        Navigator.pop(context, newNote);
+      }
     } else {
-      // Handle case where title or details is empty
-      // You can show an error message or take appropriate action.
+      // Show dialog to notify the user that details and/or title is empty
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Empty Fields'),
+            content: Text('Please enter both title and details.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
     }
   }
 }
