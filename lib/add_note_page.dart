@@ -26,6 +26,8 @@ class AddNotePage extends StatelessWidget {
             const SizedBox(height: 16),
             TextField(
               controller: detailsController,
+              maxLines: null, // Allow multiple lines for editing
+              keyboardType: TextInputType.multiline,
               decoration: const InputDecoration(labelText: 'Details'),
             ),
             const SizedBox(height: 16),

@@ -98,4 +98,60 @@ class NoteStorage {
       return false;
     }
   }
+
+  static Future<String> saveImageToNoteDirectory(
+      File imageFile, String noteTitle) async {
+    try {
+      final directoryPath = await _getNotesDirectoryPath();
+      final noteDirectory = Directory('$directoryPath/$noteTitle');
+
+      if (!await noteDirectory.exists()) {
+        await noteDirectory.create(recursive: true);
+      }
+
+      final fileName =
+          '${DateTime.now().millisecondsSinceEpoch}_${imageFile.path.split('/').last}';
+      final filePath = '${noteDirectory.path}/$fileName';
+
+      await imageFile.copy(filePath);
+      await imageFile.delete();
+      print('IMAGE COPIED SUCCESFULLY TO PATH: $filePath');
+      return filePath;
+    } catch (e) {
+      print('Error saving image: $e');
+      throw e;
+    }
+  }
+
+  static Future<List<String>?> getImagesInNoteDirectory(
+      String noteTitle) async {
+    try {
+      final directoryPath = await _getNotesDirectoryPath();
+      final noteDirectory = Directory('$directoryPath/$noteTitle');
+
+      if (!(await noteDirectory.exists())) {
+        print('Note directory does not exist.');
+        return null;
+      }
+
+      List<String> imagePaths = [];
+
+      final List<FileSystemEntity> files = noteDirectory.listSync();
+      for (FileSystemEntity file in files) {
+        if (file is File && file.path.toLowerCase().endsWith('.jpg')) {
+          imagePaths.add(file.path);
+        }
+      }
+
+      if (imagePaths.isEmpty) {
+        print('No images found in note directory.');
+        return null;
+      }
+
+      return imagePaths;
+    } catch (e) {
+      print('Error while getting images in note directory: $e');
+      return null;
+    }
+  }
 }
