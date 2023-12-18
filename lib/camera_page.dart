@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:note_app/note.dart';
-import 'package:note_app/note_storage.dart';
 
 class CameraPage extends StatefulWidget {
   final Function()? refreshProfile;
@@ -20,6 +19,8 @@ class _CameraPageState extends State<CameraPage> {
   late Future<void> _initializeControllerFuture;
   File? _capturedImage;
   final picker = ImagePicker();
+  late List<CameraDescription> _cameras;
+  late int _selectedCameraIndex;
 
   @override
   void initState() {
@@ -28,13 +29,10 @@ class _CameraPageState extends State<CameraPage> {
   }
 
   Future<void> _initializeCamera() async {
-    final cameras = await availableCameras();
-    final frontCamera = cameras.firstWhere(
-      (camera) => camera.lensDirection == CameraLensDirection.front,
-    );
-
+    _cameras = await availableCameras();
+    _selectedCameraIndex = 0; // Default: Use the first available camera
     _cameraController = CameraController(
-      frontCamera,
+      _cameras[_selectedCameraIndex],
       ResolutionPreset.max,
       enableAudio: false,
     );
@@ -90,11 +88,35 @@ class _CameraPageState extends State<CameraPage> {
     }
   }
 
+  Future<void> _toggleCamera() async {
+    int newCameraIndex = _selectedCameraIndex == 0 ? 1 : 0;
+    _selectedCameraIndex = newCameraIndex;
+    await _cameraController.dispose();
+    _cameraController = CameraController(
+      _cameras[_selectedCameraIndex],
+      ResolutionPreset.max,
+      enableAudio: false,
+    );
+
+    setState(() {
+      _initializeControllerFuture = _cameraController.initialize();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Camera'),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text('Camera'),
+            IconButton(
+              onPressed: _toggleCamera,
+              icon: const Icon(Icons.switch_camera),
+            ),
+          ],
+        ),
       ),
       body: Column(
         children: [
