@@ -8,7 +8,8 @@ import 'package:note_app/note_storage.dart';
 class CameraPage extends StatefulWidget {
   final Function()? refreshProfile;
   final Note? note;
-  CameraPage({Key? key, this.refreshProfile, this.note}) : super(key: key);
+  const CameraPage({Key? key, this.refreshProfile, this.note})
+      : super(key: key);
 
   @override
   _CameraPageState createState() => _CameraPageState();
@@ -79,17 +80,13 @@ class _CameraPageState extends State<CameraPage> {
 
   Future<void> _saveAndNavigateToDetails() async {
     try {
-      if (_capturedImage != null && widget.note != null) {
-        NoteStorage.saveImageToNoteDirectory(
-            _capturedImage!, widget.note!.title);
-
-        List<String>? updatedImagePaths =
-            await NoteStorage.getImagesInNoteDirectory(widget.note!.title);
-        Navigator.pop(context, updatedImagePaths);
+      if (widget.note != null) {
+        if (_capturedImage != null) {
+          Navigator.pop(context, _capturedImage!.path);
+        }
       }
     } catch (e) {
       print('Error saving and navigating: $e');
-      // Handle error as needed
     }
   }
 

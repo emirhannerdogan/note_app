@@ -6,7 +6,7 @@ class AddNotePage extends StatelessWidget {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController detailsController = TextEditingController();
 
-  AddNotePage({super.key});
+  AddNotePage({Key? key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,30 +14,32 @@ class AddNotePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Add new note'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: titleController,
-              decoration: const InputDecoration(labelText: 'Title'),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: detailsController,
-              maxLines: null, // Allow multiple lines for editing
-              keyboardType: TextInputType.multiline,
-              decoration: const InputDecoration(labelText: 'Details'),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                _saveNote(context); // Pass the context here
-              },
-              child: const Text('Save'),
-            ),
-          ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(labelText: 'Title'),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: detailsController,
+                maxLines: null, // Allow multiple lines for editing
+                keyboardType: TextInputType.multiline,
+                decoration: const InputDecoration(labelText: 'Details'),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  _saveNote(context); // Pass the context here
+                },
+                child: const Text('Save'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -55,14 +57,14 @@ class AddNotePage extends StatelessWidget {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text('Note Already Exists'),
-              content: Text('A note with this title already exists.'),
+              title: const Text('Note Already Exists'),
+              content: const Text('A note with this title already exists.'),
               actions: <Widget>[
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop(); // Close the dialog
                   },
-                  child: Text('OK'),
+                  child: const Text('OK'),
                 ),
               ],
             );
@@ -79,14 +81,14 @@ class AddNotePage extends StatelessWidget {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Empty Fields'),
-            content: Text('Please enter both title and details.'),
+            title: const Text('Empty Fields'),
+            content: const Text('Please enter both title and details.'),
             actions: <Widget>[
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop(); // Close the dialog
                 },
-                child: Text('OK'),
+                child: const Text('OK'),
               ),
             ],
           );

@@ -5,8 +5,7 @@ import 'package:path_provider/path_provider.dart';
 class NoteStorage {
   static Future<String> _getNotesDirectoryPath() async {
     final appDocDir = await getApplicationDocumentsDirectory();
-    return appDocDir.path +
-        '/notes'; // Use 'notes' directory within app documents
+    return '${appDocDir.path}/notes'; // Use 'notes' directory within app documents
   }
 
   static Future<List<Note>> getNotes() async {
@@ -27,8 +26,8 @@ class NoteStorage {
             for (FileSystemEntity file in files) {
               if (file is File && file.path.endsWith('.txt')) {
                 String fileContent = await file.readAsString();
-                details += fileContent +
-                    '\n'; // Adjust content concatenation as needed
+                details +=
+                    '$fileContent\n'; // Adjust content concatenation as needed
               }
             }
             notes.add(Note(title: title, details: details));
@@ -38,7 +37,7 @@ class NoteStorage {
     } catch (e) {
       print('Error while retrieving notes: $e');
     }
-    print(notes.length.toString() + ' NOTES RETRIEVED');
+    print('${notes.length} NOTES RETRIEVED');
     return notes;
   }
 
@@ -119,7 +118,7 @@ class NoteStorage {
       return filePath;
     } catch (e) {
       print('Error saving image: $e');
-      throw e;
+      rethrow;
     }
   }
 
@@ -145,13 +144,13 @@ class NoteStorage {
 
       if (imagePaths.isEmpty) {
         print('No images found in note directory.');
-        return null;
+        return [];
       }
 
       return imagePaths;
     } catch (e) {
       print('Error while getting images in note directory: $e');
-      return null;
+      return [];
     }
   }
 }

@@ -39,75 +39,77 @@ class _NoteDetailPageState extends State<NoteDetailPage> {
       appBar: AppBar(
         title: Text(widget.note.title),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: _detailsController,
-              maxLines: null, // Allow multiple lines for editing
-              keyboardType: TextInputType.multiline,
-              decoration: const InputDecoration(
-                labelText: 'Note Details',
-                border: OutlineInputBorder(),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: _detailsController,
+                maxLines: null, // Allow multiple lines for editing
+                keyboardType: TextInputType.multiline,
+                decoration: const InputDecoration(
+                  labelText: 'Note Details',
+                  border: OutlineInputBorder(),
+                ),
               ),
-            ),
-            if (imagePaths != null && imagePaths!.isNotEmpty)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      'Images',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.normal,
+              if (imagePaths != null && imagePaths!.isNotEmpty)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text(
+                        'Images',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.normal,
+                        ),
                       ),
                     ),
-                  ),
-                  Container(
-                    height: 200, // Set the container height as needed
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: imagePaths!.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Colors.black,
-                                width: 1,
+                    SizedBox(
+                      height: 200, // Set the container height as needed
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: imagePaths!.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Colors.black,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Image.file(
+                                File(imagePaths![index]),
+                                width: 200, // Adjust the width as needed
+                                height: 200, // Adjust the height as needed
+                                fit: BoxFit
+                                    .contain, // Show images without cropping
                               ),
                             ),
-                            child: Image.file(
-                              File(imagePaths![index]),
-                              width: 200, // Adjust the width as needed
-                              height: 200, // Adjust the height as needed
-                              fit: BoxFit
-                                  .contain, // Show images without cropping
-                            ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+              ElevatedButton(
+                onPressed: () {
+                  _saveChanges();
+                },
+                child: const Text('Save Changes'),
               ),
-            ElevatedButton(
-              onPressed: () {
-                _saveChanges();
-              },
-              child: Text('Save Changes'),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          List<String>? updatedImagePaths = await Navigator.push(
+          String? newImagePath = await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => CameraPage(
@@ -115,9 +117,9 @@ class _NoteDetailPageState extends State<NoteDetailPage> {
               ),
             ),
           );
-          if (updatedImagePaths != null) {
+          if (newImagePath != null) {
             setState(() {
-              imagePaths = updatedImagePaths;
+              imagePaths?.add(newImagePath);
             });
           } // Navigate to CameraPage
         },
@@ -140,17 +142,17 @@ class _NoteDetailPageState extends State<NoteDetailPage> {
       final File noteFile =
           File('${noteDirectory.path}/${widget.note.title}.txt');
 
-      print('Old details: ${widget.note.details}'); // Debug log for old details
+      if (imagePaths != null) {
+        for (String imagePath in imagePaths!) {
+          await NoteStorage.saveImageToNoteDirectory(
+              File(imagePath), widget.note.title);
+        }
+      }
 
       await noteFile.writeAsString(newDetails);
 
-      // Read the content from the file after writing the new details
-      String updatedContent = await noteFile.readAsString();
-      print(
-          'Updated details from file: $updatedContent'); // Debug log for updated details
-
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Changes saved.'),
         ),
       );
@@ -160,7 +162,7 @@ class _NoteDetailPageState extends State<NoteDetailPage> {
       Navigator.pop(context, widget.note);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Failed to save changes.'),
         ),
       );
