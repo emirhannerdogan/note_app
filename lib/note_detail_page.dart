@@ -5,6 +5,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:note_app/note.dart';
 
+import 'bluetooth_handler.dart';
+
 class NoteDetailPage extends StatefulWidget {
   final Note note;
 
@@ -17,6 +19,8 @@ class NoteDetailPage extends StatefulWidget {
 class _NoteDetailPageState extends State<NoteDetailPage> {
   late TextEditingController _detailsController;
   List<String>? imagePaths;
+  BluetoothHandler bluetoothHandler =
+      BluetoothHandler(); // Create an instance of BluetoothHandler
 
   @override
   void initState() {
@@ -46,6 +50,15 @@ class _NoteDetailPageState extends State<NoteDetailPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.note.title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.bluetooth),
+            onPressed: () {
+              // Bluetooth işlemlerini başlat
+              bluetoothHandler.startBluetoothProcess(context);
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
