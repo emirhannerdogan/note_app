@@ -40,6 +40,8 @@ dependencies:
   path_provider: ^2.1.1
   camera: ^0.10.5+7
   image_picker: ^1.0.5
+  permission_handler: ^11.1.0
+  get: ^4.3.8
 
 dev_dependencies:
   flutter_test:
