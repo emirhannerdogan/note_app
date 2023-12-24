@@ -55,7 +55,12 @@ class _NoteDetailPageState extends State<NoteDetailPage> {
             icon: const Icon(Icons.bluetooth),
             onPressed: () {
               // Bluetooth işlemlerini başlat
-              bluetoothHandler.startBluetoothProcess(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => bluetoothHandler,
+                ),
+              );
             },
           ),
         ],
