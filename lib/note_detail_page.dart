@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:note_app/camera_page.dart';
 import 'package:note_app/note_storage.dart';
+import 'package:note_app/scan_screen.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:note_app/note.dart';
 
-import 'bluetooth_handler.dart';
 
 class NoteDetailPage extends StatefulWidget {
   final Note note;
@@ -19,8 +19,7 @@ class NoteDetailPage extends StatefulWidget {
 class _NoteDetailPageState extends State<NoteDetailPage> {
   late TextEditingController _detailsController;
   List<String>? imagePaths;
-  BluetoothHandler bluetoothHandler =
-      BluetoothHandler(); // Create an instance of BluetoothHandler
+  ScanScreen bluetoothHandler =ScanScreen(); // Create an instance of BluetoothHandler
 
   @override
   void initState() {

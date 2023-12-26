@@ -1,85 +1,80 @@
+
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_blue/flutter_blue.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+
+import 'bluetooth_off_screen.dart';
+import 'scan_screen.dart';
 
 class BluetoothHandler extends StatefulWidget {
   const BluetoothHandler({Key? key}) : super(key: key);
 
   @override
-  _BluetoothHandlerState createState() => _BluetoothHandlerState();
+  State<BluetoothHandler> createState() => _BluetoothHandlerState();
 }
 
 class _BluetoothHandlerState extends State<BluetoothHandler> {
-  FlutterBlue ble = FlutterBlue.instance;
-  List<BluetoothDevice> foundDevices = [];
+  BluetoothAdapterState _adapterState = BluetoothAdapterState.unknown;
 
-  void startBluetoothProcess() async {}
+  late StreamSubscription<BluetoothAdapterState> _adapterStateStateSubscription;
 
-  Future scanDevices() async {
-    var status = await Permission.bluetoothScan.status;
-    var status1 = await Permission.bluetoothConnect.status;
-    debugPrint(status.toString());
-    debugPrint(status1.toString());
-
-    debugPrint("Taranıyor");
-    foundDevices.clear(); // Temizleme işlemi her başlatıldığında yapılsın.
-    ble.startScan(timeout: const Duration(seconds: 4)).then((value) {
-      debugPrint("Tarama süresi doldu...");
-    });
-
-    ble.scanResults.listen((List<ScanResult> results) {
-      for (ScanResult r in results) {
-        setState(() {
-          if (r.device.name != '' && !foundDevices.contains(r.device)) {
-            foundDevices.add(r.device);
-          }
-        });
-        debugPrint('${r.device.name} found! rssi: ${r.rssi}');
-        debugPrint(r.toString());
-        debugPrint(r.advertisementData.toString());
+  @override
+  void initState() {
+    super.initState();
+    _adapterStateStateSubscription = FlutterBluePlus.adapterState.listen((state) {
+      _adapterState = state;
+      if (mounted) {
+        setState(() {});
       }
     });
   }
 
   @override
-  void initState() {
-    //startBluetoothProcess();
-    super.initState();
+  void dispose() {
+    _adapterStateStateSubscription.cancel();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Bluetooth"),
-      ),
-      body: Column(
-        children: [
-          ElevatedButton(
-            onPressed: () {
-              scanDevices();
-            },
-            child: const Text("Cihazları Tara"),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: foundDevices.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(foundDevices[index].name),
-                  subtitle: Text(foundDevices[index].id.toString()),
-                  trailing: ElevatedButton(
-                    onPressed: () {
-                      // Cihazı eşleştir
-                    },
-                    child: const Text("Eşleştir"),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+    Widget screen = _adapterState == BluetoothAdapterState.on
+        ? const ScanScreen()
+        : BluetoothOffScreen(adapterState: _adapterState);
+
+    return MaterialApp(
+      color: Colors.lightBlue,
+      home: screen,
+      navigatorObservers: [BluetoothAdapterStateObserver()],
     );
+  }
+}
+
+//
+// This observer listens for Bluetooth Off and dismisses the DeviceScreen
+//
+class BluetoothAdapterStateObserver extends NavigatorObserver {
+  StreamSubscription<BluetoothAdapterState>? _adapterStateSubscription;
+
+  @override
+  void didPush(Route route, Route? previousRoute) {
+    super.didPush(route, previousRoute);
+    if (route.settings.name == '/DeviceScreen') {
+      // Start listening to Bluetooth state changes when a new route is pushed
+      _adapterStateSubscription ??= FlutterBluePlus.adapterState.listen((state) {
+        if (state != BluetoothAdapterState.on) {
+          // Pop the current route if Bluetooth is off
+          navigator?.pop();
+        }
+      });
+    }
+  }
+
+  @override
+  void didPop(Route route, Route? previousRoute) {
+    super.didPop(route, previousRoute);
+    // Cancel the subscription when the route is popped
+    _adapterStateSubscription?.cancel();
+    _adapterStateSubscription = null;
   }
 }
